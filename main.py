@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from datetime import datetime as dt
 import requests
+from sqlalchemy import create_engine
 
 load_dotenv(".env.secrets")
 
@@ -25,8 +26,8 @@ def transform(data):
     output_data["latitude"]     = data['coord'] [ 'lat']    
     output_data["description"]  = data['weather'] [0] ['description']
 
-    output_data["temp"]         = data['main'] ['temp']
-    output_data["feel_temp"]    = data['main'] ['feels_like']
+    output_data["temp"]         = int(data['main'] ['temp'] - 273.15) # convert from kelvin to celsius
+    output_data["feel_temp"]    = int(data['main'] ['feels_like'] -273.15)
     output_data["humidity"]     = data['main'] ['humidity']
     output_data["wind_speed"]   = int(data['wind'] ['speed']) * 3.6 # convert from m/s to km/h
 
@@ -36,10 +37,32 @@ def transform(data):
     output_data["dt"]           = dt.fromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S')
     output_data['extract_date'] = dt.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    df = pd.DataFrame([output_data],index=None) 
-    name_file = output_data['extract_date'].replace(" ","_").split(":")[0] 
-    df.to_csv(f"extraction_{name_file}.csv")
+    return output_data
+
+
+
+def load(data_cleaned):
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_USER = os.getenv("DB_USER")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_NAME = os.getenv("DB_NAME")
+    engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    
+    df = pd.DataFrame([data_cleaned])
+    try:
+        df.to_sql("weather_table",engine,if_exists='append',index=False)
+        print("Data added Succesfully")
+
+    except Exception as e:
+        # Toute autre erreur (Python, Pandas, etc.)
+        print(f"❌ Erreur inattendue : {e}")
+    finally:
+        name_file = data_cleaned['extract_date'].replace(" ","_").split(":")[0] 
+        df.to_csv(f"extraction_{name_file}.csv")
 
 data = extract()
 
-transform(data)
+data_cleaned = transform(data)
+
+load(data_cleaned)
