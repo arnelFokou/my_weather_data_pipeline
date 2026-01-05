@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+#airflow
+airflow/airflow.db    
+airflow/logs/         
+airflow/airflow.cfg
+airflow/__pycache__/
+simple_auth_manager_passwords.json.generated
+airflow/airflow.db-shm
+airflow/airflow.db-wal
+etl_functions/__pycache__/
