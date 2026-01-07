@@ -1,11 +1,10 @@
-import os
 import requests
-from dotenv import load_dotenv
+from airflow.models import Variable
 
-load_dotenv('.env.secrets')
+
 def extract():
-
-    url = f"https://api.openweathermap.org/data/2.5/weather?q=Paris&appid={os.getenv('API_KEY')}"
+    API_KEY = Variable.get("API_KEY")
+    url = f"https://api.openweathermap.org/data/2.5/weather?q=Paris&appid={API_KEY}"
     try:
         response = requests.get(url)
         response.raise_for_status()

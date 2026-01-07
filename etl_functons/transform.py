@@ -1,7 +1,8 @@
 from datetime import datetime as dt
 
 
-def transform(data):
+def transform(**args):
+    data = args['ti'].xcom_pull(task_ids = "extract")
     output_data ={}
 
     output_data["longitude"]    = data['coord'] ['lon']
