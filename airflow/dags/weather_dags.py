@@ -15,7 +15,6 @@ from airflow.operators.python import PythonOperator
 from etl_functons.extract import extract
 from etl_functons.load import load
 from etl_functons.transform import transform 
-from etl_functons.load_to_postgres import load_to_postgres
 from datetime import datetime
 
 
@@ -28,8 +27,8 @@ with DAG(
     'first_weather_dag',
     description='A simple ETL DAG',
     schedule = '30 * * * *',
-    start_date = datetime(2025, 1, 5),
-    catchup = False
+    start_date = datetime(2025, 1, 7),
+    catchup =   True # fait des rattrapages depuis le 5 janvier
 ) as weather_dag:
     
     extract_task = PythonOperator(
@@ -48,10 +47,5 @@ with DAG(
         python_callable = load
     )
 
-    load_db = PythonOperator(
-        task_id = 'db',
-        python_callable = load_to_postgres
-
-    )
-   
-    extract_task >> transform_task >> load_task >> load_db
+     
+    extract_task >> transform_task >> load_task 

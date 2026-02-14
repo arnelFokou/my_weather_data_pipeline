@@ -215,3 +215,4 @@ simple_auth_manager_passwords.json.generated
 airflow/airflow.db-shm
 airflow/airflow.db-wal
 etl_functions/__pycache__/
+files_extracted/
